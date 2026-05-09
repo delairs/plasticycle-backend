@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: plasticycle-backend
+  namespace: prod
+spec:
+  type: ClusterIP
+  selector:
+    app: plasticycle-backend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000

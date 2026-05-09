@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plasticycle-backend
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plasticycle-backend
+  template:
+    metadata:
+      labels:
+        app: plasticycle-backend
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-token: "true"
+        vault.hashicorp.com/role: "prod"
+        vault.hashicorp.com/auth-path: "auth/kubernetes-cluster-demo"
+
+        vault.hashicorp.com/agent-inject-secret-envconsul.hcl: "kv/secret/prod/PLASTICYCLE"
+        vault.hashicorp.com/agent-inject-template-envconsul.hcl: |
+          vault {
+            address = "http://vault.vault.svc:8200"
+            vault_agent_token_file = "/vault/secrets/token"
+            renew_token = true
+          }
+
+          # Existing static secret kamu
+          secret {
+            path = "kv/data/secret/prod/PLASTICYCLE"
+            no_prefix = true
+          }
+
+          # Dynamic PostgreSQL credential
+          secret {
+            path = "database/creds/plasticycle-app"
+            no_prefix = true
+
+            key {
+              name = "username"
+              format = "DB_USERNAME"
+            }
+
+            key {
+              name = "password"
+              format = "DB_PASSWORD"
+            }
+          }
+    spec:
+      serviceAccountName: vault-auth
+      containers:
+        - name: plasticycle-backend
+          image: delairs/plasticycle-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: DB_HOST
+              value: "postgres.prod.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: "plasticycle"
+            - name: DB_POOL_MAX
+              value: "10"
