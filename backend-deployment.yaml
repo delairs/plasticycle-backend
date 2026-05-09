@@ -26,7 +26,6 @@ spec:
             renew_token = true
           }
 
-          # Existing static secret kamu
           secret {
             path = "kv/data/secret/prod/PLASTICYCLE"
             no_prefix = true
