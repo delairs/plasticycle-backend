@@ -143,7 +143,7 @@ pipeline {
                 script {
                     try {
                         dir ('sourcecode') {
-                            sh "sed -i 's/latest/$env.BUILD_NUMBER/g' deployment.yaml"
+                            sh "sed -i 's/latest/$env.BUILD_NUMBER/g' backend-deployment.yaml"
                             sh "kubectl --kubeconfig=$kubeConfig apply --validate=false -f backend-deployment.yaml -n prod"
                             sh "kubectl --kubeconfig=$kubeConfig rollout status deployment ${appsName} -n prod --timeout=300s"
                         }
