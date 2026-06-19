@@ -4,10 +4,11 @@ metadata:
   name: plasticycle-backend
   namespace: prod
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: plasticycle-backend
   ports:
     - name: http
       port: 3000
       targetPort: 3000
+      nodePort: 30085
